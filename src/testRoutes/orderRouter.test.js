@@ -46,3 +46,11 @@ test('add to menu', async () => {
     expect(putMenuRes.status).toBe(200);
     expect(putMenuRes.body.at(-1)).toEqual(expect.objectContaining(newItem));
 });
+
+test('get orders', async () => {
+    const loginRes = await request(app).put('/api/auth').send(testUser);
+    const token = loginRes.body.token;
+
+    const getOrderRes = await request(app).get('/api/order').set('Authorization', `Bearer ${token}`);
+    expect(getOrderRes.status).toBe(200);
+});
