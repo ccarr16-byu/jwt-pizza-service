@@ -88,3 +88,24 @@ test('make store', async () => {
     expect(makeStoreRes.status).toBe(200);
     expect(makeStoreRes.body.name).toMatch(storeName);
 });
+
+test('delete store', async () => {
+    const adminUser = await createAdminUser();
+    const loginRes = await request(app).put('/api/auth').send(adminUser);
+    const token = loginRes.body.token;
+
+    const franchiseName = randomName();
+    const newFranchise = { name: `${franchiseName}`, admins: [{email: `${adminUser.email}`}] };
+    const makeFranchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${token}`).set('Content-Type', 'application/json').send(newFranchise);
+    const franchiseId = makeFranchiseRes.body.id;
+
+    const storeName = randomName();
+    const newStore = { name: `${storeName}`, franchiseId: `${franchiseId}` };
+
+    const makeStoreRes = await request(app).post(`/api/franchise/${franchiseId}/store`).set('Authorization', `Bearer ${token}`).set('Content-Type', 'application/json').send(newStore);
+    const storeId = makeStoreRes.body.id;
+
+    const deleteStoreRes = await request(app).delete(`/api/franchise/${franchiseId}/store/${storeId}`).set('Authorization', `Bearer ${token}`);
+    expect(deleteStoreRes.status).toBe(200);
+    expect(deleteStoreRes.body.message).toMatch('store deleted');
+});
