@@ -34,3 +34,15 @@ test('get menu', async () => {
     const getMenuRes = await request(app).get('/api/order/menu');
     expect(getMenuRes.status).toBe(200);
 });
+
+test('add to menu', async () => {
+    const adminUser = await createAdminUser();
+    const loginRes = await request(app).put('/api/auth').send(adminUser);
+    const token = loginRes.body.token;
+    const itemName = randomName();
+    const newItem = { title: `${itemName}`, description: 'test', image: 'test', price: 0.0001 };
+
+    const putMenuRes = await request(app).put('/api/order/menu').set('Authorization', `Bearer ${token}`).send(newItem);
+    expect(putMenuRes.status).toBe(200);
+    expect(putMenuRes.body.at(-1)).toEqual(expect.objectContaining(newItem));
+});
