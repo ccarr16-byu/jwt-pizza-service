@@ -31,6 +31,15 @@ async function createAdminUser() {
 }
 
 test('get all franchises', async () => {
-    const getAllRes = await request(app).get('/api/franchise?page=0&limit=10&name=*');
-    expect(getAllRes.status).toBe(200);
+    const getAllFranchisesRes = await request(app).get('/api/franchise?page=0&limit=10&name=*');
+    expect(getAllFranchisesRes.status).toBe(200);
+});
+
+test('get user franchises', async () => {
+    const loginRes = await request(app).put('/api/auth').send(testUser);
+    const token = loginRes.body.token;
+    const userId = loginRes.body.user.id
+
+    const getUserFranchisesRes = await request(app).get(`/api/franchise/${userId}`).set('Authorization', `Bearer ${token}`);
+    expect(getUserFranchisesRes.status).toBe(200);
 });
