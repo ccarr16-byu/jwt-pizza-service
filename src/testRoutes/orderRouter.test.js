@@ -54,3 +54,17 @@ test('get orders', async () => {
     const getOrderRes = await request(app).get('/api/order').set('Authorization', `Bearer ${token}`);
     expect(getOrderRes.status).toBe(200);
 });
+
+test('make order', async () => {
+    const loginRes = await request(app).put('/api/auth').send(testUser);
+    const token = loginRes.body.token;
+
+    const getMenuRes = await request(app).get('/api/order/menu');
+    const orderItem = getMenuRes.body.at(0);
+    const newOrder = { franchiseId: 1, storeId: 1, items: [{ menuId: `${orderItem.id}`, description: `${orderItem.title}`, price: `${orderItem.price}`}]}
+
+    const makeOrderRes = await request(app).post('/api/order').set('Authorization', `Bearer ${token}`).send(newOrder);
+    expect(makeOrderRes.status).toBe(200);
+    expect(makeOrderRes.body.order).toEqual(expect.objectContaining(newOrder));
+    expect(expectValidJwt(makeOrderRes.body.jwt))
+});
