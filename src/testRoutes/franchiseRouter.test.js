@@ -108,4 +108,6 @@ test('delete store', async () => {
     const deleteStoreRes = await request(app).delete(`/api/franchise/${franchiseId}/store/${storeId}`).set('Authorization', `Bearer ${token}`);
     expect(deleteStoreRes.status).toBe(200);
     expect(deleteStoreRes.body.message).toMatch('store deleted');
+
+    const unused;
 });
