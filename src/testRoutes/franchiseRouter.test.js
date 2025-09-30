@@ -55,3 +55,18 @@ test('make franchise', async () => {
     expect(makeFranchiseRes.status).toBe(200);
     expect(makeFranchiseRes.body.name).toMatch(franchiseName);
 });
+
+test('delete franchise', async () => {
+    const adminUser = await createAdminUser();
+    const loginRes = await request(app).put('/api/auth').send(adminUser);
+    const token = loginRes.body.token;
+    const franchiseName = randomName();
+    const newFranchise = { name: `${franchiseName}`, admins: [{email: `${adminUser.email}`}] };
+
+    const makeFranchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${token}`).set('Content-Type', 'application/json').send(newFranchise);
+    const franchiseId = makeFranchiseRes.body.id;
+
+    const deleteFranchiseRes = await request(app).delete(`/api/franchise/${franchiseId}`).set('Authorization', `Bearer ${token}`);
+    expect(deleteFranchiseRes.status).toBe(200);
+    expect(deleteFranchiseRes.body.message).toMatch('franchise deleted');
+});
