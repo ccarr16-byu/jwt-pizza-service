@@ -43,3 +43,15 @@ test('get user franchises', async () => {
     const getUserFranchisesRes = await request(app).get(`/api/franchise/${userId}`).set('Authorization', `Bearer ${token}`);
     expect(getUserFranchisesRes.status).toBe(200);
 });
+
+test('make franchise', async () => {
+    const adminUser = await createAdminUser();
+    const loginRes = await request(app).put('/api/auth').send(adminUser);
+    const token = loginRes.body.token;
+    const franchiseName = randomName();
+    const newFranchise = { name: `${franchiseName}`, admins: [{email: `${adminUser.email}`}] };
+
+    const makeFranchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${token}`).set('Content-Type', 'application/json').send(newFranchise);
+    expect(makeFranchiseRes.status).toBe(200);
+    expect(makeFranchiseRes.body.name).toMatch(franchiseName);
+});
