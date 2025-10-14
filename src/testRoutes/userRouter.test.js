@@ -64,7 +64,7 @@ test('list users unauthorized', async () => {
 test('list users', async () => {
   const [user, userToken] = await registerUser(request(app));
   const listUsersRes = await request(app)
-    .get('/api/user')
+    .get('/api/user?page=0&limit=3&name=*pi*')
     .set('Authorization', 'Bearer ' + userToken);
   expect(listUsersRes.status).toBe(200);
 });
