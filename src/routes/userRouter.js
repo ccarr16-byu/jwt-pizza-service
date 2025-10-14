@@ -39,6 +39,14 @@ userRouter.docs = [
       ],
     },
   },
+  {
+    method: 'DELETE',
+    path: '/api/user/:userId',
+    requiresAuth: true,
+    description: 'Deletes a user',
+    example: `curl -X DELETE localhost:3000/api/user/1 -H 'Authorization: Bearer tttttt'`,
+    response: { message: 'user deleted' },
+  },
 ];
 
 // getUser
@@ -75,6 +83,16 @@ userRouter.get(
   asyncHandler(async (req, res) => {
     const [users, more] = await DB.getUsers(req.query.page, req.query.limit, req.query.name);
     res.json({ users, more });
+  })
+);
+
+// deleteUser
+userRouter.delete(
+  '/:userId',
+  asyncHandler(async (req, res) => {
+    const userId = Number(req.params.userId);
+    await DB.deleteUser(userId);
+    res.json({ message: 'user deleted' });
   })
 );
 
