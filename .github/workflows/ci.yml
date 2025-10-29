@@ -45,6 +45,7 @@ jobs:
                     apiKey: '${{ secrets.FACTORY_API_KEY }}',
                 },
             };" > src/config.js
+
       - name: Tests
         run: npm test
 
@@ -76,6 +77,17 @@ jobs:
         with:
           name: package
           path: dist/
+    
+    services:
+        mysql:
+            image: mysql:8.0.29
+            env:
+                MYSQL_ROOT_PASSWORD: tempdbpassword
+                MYSQL_DATABASE: pizza
+            ports:
+                - '3306:3306'
+            options: >-
+                --health-cmd "mysqladmin ping -ptempdbpassword" --health-interval 10s --health-start-period 10s --health-timeout 5s --health-retries 10
 
   deploy:
     runs-on: ubuntu-latest
@@ -116,13 +128,3 @@ jobs:
           docker build --platform=linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY --push .
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >>  $GITHUB_OUTPUT
           
-    services:
-        mysql:
-            image: mysql:8.0.29
-            env:
-                MYSQL_ROOT_PASSWORD: tempdbpassword
-                MYSQL_DATABASE: pizza
-            ports:
-                - '3306:3306'
-            options: >-
-                --health-cmd "mysqladmin ping -ptempdbpassword" --health-interval 10s --health-start-period 10s --health-timeout 5s --health-retries 10
