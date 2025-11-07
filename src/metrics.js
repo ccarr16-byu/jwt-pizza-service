@@ -6,14 +6,8 @@ class OtelMetricBuilder {
         this.metrics = [];
     }
 
-    add(metricCategory) {
-        for (i = 0; i < metricCategory.length; i++) {
-            this.metrics.push(createMetric(metricCategory[i]));
-        }
-    }
-
     createMetric(metricSpec) {
-        attributes = { ...metricSpec.attributes, source: config.source };
+        const attributes = { ...metricSpec.attributes, source: config.source };
 
         const metric = {
             name: metricSpec.name,
@@ -44,13 +38,19 @@ class OtelMetricBuilder {
         return metric;
     }
 
+    add(metricCategory) {
+        for (let i = 0; i < metricCategory.length; i++) {
+            this.metrics.push(createMetric(metricCategory[i]));
+        }
+    }
+
     sendToGrafana() {
         const body = {
             resourceMetrics: [
                 {
                     scopeMetrics: [
                         {
-                            metrics,
+                            metrics: this.metrics,
                         },
                     ],
                 },
@@ -85,7 +85,7 @@ let requestLatency = 0;
 
 function requestTracker(req, res, next) {
   const endpoint = `[${req.method}] ${req.path}`;
-  httpMetrics[endpoint] = (httpMetrics[endpoint] || 0) + 1;
+  requests[endpoint] = (requests[endpoint] || 0) + 1;
   next();
 }
 
