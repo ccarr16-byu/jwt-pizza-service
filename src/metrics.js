@@ -186,7 +186,7 @@ function getPizzaMetrics() {
 }
 
 function sendMetricsPeriodically(period) {
-    const timer = setInterval(() => {
+    setInterval(() => {
         try {
             const metrics = new OtelMetricBuilder();
             metrics.add(getHttpMetrics(requests));

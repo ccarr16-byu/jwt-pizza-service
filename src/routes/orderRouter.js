@@ -93,7 +93,7 @@ orderRouter.post(
     if (r.ok) {
       const items = orderReq.items;
       const order_size = items.length;
-      for (i = 0; i < order_size; i++) {
+      for (let i = 0; i < order_size; i++) {
         price += items[i].price;
       }
       metrics.pizzaPurchase('success', latency, price, order_size);
