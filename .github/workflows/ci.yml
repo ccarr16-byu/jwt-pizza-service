@@ -57,7 +57,13 @@ jobs:
             }
           };
           EOF
-            
+
+      - name: Show config content (safe)
+        run: |
+          echo "--- src/config.js ---"
+          cat src/config.js
+          echo "---------------------"
+                  
       - name: Validate config
         run: |
           grep -q "${{ secrets.METRICS_URL }}" src/config.js && echo "❌ METRICS_URL secret not injected" && exit 1 || echo "✅ METRICS_URL looks good"
