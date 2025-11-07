@@ -61,7 +61,6 @@ authRouter.authenticateToken = (req, res, next) => {
 // register
 authRouter.post(
   '/',
-  metrics.logUser('login'),
   asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -69,6 +68,7 @@ authRouter.post(
     }
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
+    metrics.logUser('login');
     res.json({ user: user, token: auth });
   })
 );
@@ -76,11 +76,11 @@ authRouter.post(
 // login
 authRouter.put(
   '/',
-  metrics.logUser('login'),
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
+    metrics.logUser('login');
     res.json({ user: user, token: auth });
   })
 );
@@ -88,10 +88,10 @@ authRouter.put(
 // logout
 authRouter.delete(
   '/',
-  metrics.logUser('logout'),
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     await clearAuth(req);
+    metrics.logUser('logout')
     res.json({ message: 'logout successful' });
   })
 );
