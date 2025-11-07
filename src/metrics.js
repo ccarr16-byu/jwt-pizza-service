@@ -40,7 +40,7 @@ class OtelMetricBuilder {
 
     add(metricCategory) {
         for (let i = 0; i < metricCategory.length; i++) {
-            this.metrics.push(createMetric(metricCategory[i]));
+            this.metrics.push(this.createMetric(metricCategory[i]));
         }
     }
 
