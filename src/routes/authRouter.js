@@ -38,6 +38,7 @@ async function setAuthUser(req, res, next) {
     try {
       if (await DB.isLoggedIn(token)) {
         // Check the database to make sure the token is valid.
+        metrics.logAuth('success');
         req.user = jwt.verify(token, config.jwtSecret);
         req.user.isRole = (role) => !!req.user.roles.find((r) => r.role === role);
       }
@@ -51,10 +52,8 @@ async function setAuthUser(req, res, next) {
 // Authenticate token
 authRouter.authenticateToken = (req, res, next) => {
   if (!req.user) {
-    metrics.logAuth('failure');
     return res.status(401).send({ message: 'unauthorized' });
   }
-  metrics.logAuth('success');
   next();
 };
 
@@ -68,7 +67,6 @@ authRouter.post(
     }
     const user = await DB.addUser({ name, email, password, roles: [{ role: Role.Diner }] });
     const auth = await setAuth(user);
-    metrics.logUser('login');
     res.json({ user: user, token: auth });
   })
 );
@@ -80,7 +78,6 @@ authRouter.put(
     const { email, password } = req.body;
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
-    metrics.logUser('login');
     res.json({ user: user, token: auth });
   })
 );
@@ -91,7 +88,6 @@ authRouter.delete(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     await clearAuth(req);
-    metrics.logUser('logout')
     res.json({ message: 'logout successful' });
   })
 );

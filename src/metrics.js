@@ -15,7 +15,7 @@ class OtelMetricBuilder {
             [metricSpec.type]: {
             dataPoints: [
                 {
-                [metricSpec.valueType]: metricSpec.value,
+                [metricSpec.valueType]: sanitizeValue(metricSpec.value),
                 timeUnixNano: Date.now() * 1000000,
                 attributes: [],
                 },
@@ -120,9 +120,9 @@ function logAuth(status) {
 
 function getSystemMetrics() {
     const systemMetrics = [];
-    const cpuMetric = { name: 'cpu', value: getCpuUsagePercentage(), unit: '%', type: 'gauge', valueType: 'asInt', attributes: {} };
+    const cpuMetric = { name: 'cpu', value: getCpuUsagePercentage(), unit: '%', type: 'gauge', valueType: 'asDouble', attributes: {} };
     systemMetrics.push(cpuMetric);
-    const memoryMetric = { name: 'memory', value: getMemoryUsagePercentage(), unit: '%', type: 'gauge', valueType: 'asInt', attributes: {} };
+    const memoryMetric = { name: 'memory', value: getMemoryUsagePercentage(), unit: '%', type: 'gauge', valueType: 'asDouble', attributes: {} };
     systemMetrics.push(memoryMetric);
     return systemMetrics;
 }
@@ -138,6 +138,17 @@ function getMemoryUsagePercentage() {
     const usedMemory = totalMemory - freeMemory;
     const memoryUsage = (usedMemory / totalMemory) * 100;
     return memoryUsage.toFixed(2);
+}
+
+function sanitizeValue(value) {
+    if (typeof value === 'string') {
+        value = parseFloat(value);
+    }
+    if (isNaN(value) || value === Infinity || value === -Infinity) {
+        return 0;
+    } else {
+        return value;
+    }
 }
 
 function getAuthMetrics() {
@@ -167,9 +178,9 @@ function pizzaPurchase(status, latency, price, order_size) {
 
 function getLatencyMetrics() {
     const latencyMetrics = [];
-    const endpointLatencyMetric = { name: 'request latency', value: requestLatency, unit: 'ms', type: 'sum', valueType: 'asInt', attributes: {} };
+    const endpointLatencyMetric = { name: 'request latency', value: requestLatency, unit: 'ms', type: 'sum', valueType: 'asDouble', attributes: {} };
     latencyMetrics.push(endpointLatencyMetric);
-    const pizzaLatencyMetric = { name: 'pizza latency', value: pizzaLatency, unit: 'ms', type: 'sum', valueType: 'asInt', attributes: {} };
+    const pizzaLatencyMetric = { name: 'pizza latency', value: pizzaLatency, unit: 'ms', type: 'sum', valueType: 'asDouble', attributes: {} };
     latencyMetrics.push(pizzaLatencyMetric);
     return latencyMetrics;
 }
@@ -180,7 +191,7 @@ function getPizzaMetrics() {
     pizzaMetrics.push(pizzasSoldMetric);
     const failedPizzasMetric = { name: 'purchase failures', value: failedPizzas, unit: '1', type: 'sum', valueType: 'asInt', attributes: {} };
     pizzaMetrics.push(failedPizzasMetric);
-    const revenueMetric = { name: 'revenue', value: revenue, unit: '1', type: 'sum', valueType: 'asInt', attributes: {} };
+    const revenueMetric = { name: 'revenue', value: revenue, unit: '1', type: 'sum', valueType: 'asDouble', attributes: {} };
     pizzaMetrics.push(revenueMetric);
     return pizzaMetrics;
 }

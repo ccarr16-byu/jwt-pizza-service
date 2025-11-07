@@ -1,6 +1,7 @@
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const config = require('../config.js');
+const metrics = require('../metrics.js');
 const { StatusCodeError } = require('../endpointHelper.js');
 const { Role } = require('../model/model.js');
 const dbModel = require('./dbModel.js');
@@ -61,6 +62,7 @@ class DB {
       const userResult = await this.query(connection, `SELECT * FROM user WHERE email=?`, [email]);
       const user = userResult[0];
       if (!user || (password && !(await bcrypt.compare(password, user.password)))) {
+        metrics.logAuth('failure');
         throw new StatusCodeError('unknown user', 404);
       }
 
@@ -138,6 +140,7 @@ class DB {
     const connection = await this.getConnection();
     try {
       await this.query(connection, `INSERT INTO auth (token, userId) VALUES (?, ?) ON DUPLICATE KEY UPDATE token=token`, [token, userId]);
+      metrics.logUser('login');
     } finally {
       connection.end();
     }
@@ -159,6 +162,7 @@ class DB {
     const connection = await this.getConnection();
     try {
       await this.query(connection, `DELETE FROM auth WHERE token=?`, [token]);
+      metrics.logUser('logout')
     } finally {
       connection.end();
     }
