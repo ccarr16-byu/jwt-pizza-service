@@ -7,7 +7,7 @@ class OtelMetricBuilder {
     }
 
     createMetric(metricSpec) {
-        const attributes = { ...metricSpec.attributes, source: config.source };
+        const attributes = { ...metricSpec.attributes, source: config.metrics.source };
 
         const metric = {
             name: metricSpec.name,
@@ -57,10 +57,10 @@ class OtelMetricBuilder {
             ],
         };
 
-        fetch(`${config.url}`, {
+        fetch(`${config.metrics.url}`, {
             method: 'POST',
             body: JSON.stringify(body),
-            headers: { Authorization: `Bearer ${config.apiKey}`, 'Content-Type': 'application/json' },
+            headers: { Authorization: `Bearer ${config.metrics.apiKey}`, 'Content-Type': 'application/json' },
         })
         .then((response) => {
             if (!response.ok) {
