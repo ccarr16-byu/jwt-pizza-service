@@ -27,29 +27,36 @@ jobs:
         run: npm run lint
 
       - name: Write config file
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FACTORY_API_KEY: ${{ secrets.FACTORY_API_KEY }}
+          METRICS_URL: ${{ secrets.METRICS_URL }}
+          METRICS_API_KEY: ${{ secrets.METRICS_API_KEY }}
         run: |
-            echo "module.exports = {
-                jwtSecret: '${{ secrets.JWT_SECRET }}',
-                db: {
-                    connection: {
-                        host: '127.0.0.1',
-                        user: 'root',
-                        password: 'tempdbpassword',
-                        database: 'pizza',
-                        connectTimeout: 60000,
-                    },
-                    listPerPage: 10,
-                },
-                factory: {
-                    url: 'https://pizza-factory.cs329.click',
-                    apiKey: '${{ secrets.FACTORY_API_KEY }}',
-                },
-                metrics: {
-                  source: 'jwt-pizza-service',
-                  url: '${{ secrets.METRICS_URL }}',
-                  apiKey: '${{ secrets.METRICS_API_KEY }}',
-                },
-            };" > src/config.js
+          cat <<EOF > src/config.js
+          module.exports = {
+            jwtSecret: '${JWT_SECRET}',
+            db: {
+              connection: {
+                host: '127.0.0.1',
+                user: 'root',
+                password: 'tempdbpassword',
+                database: 'pizza',
+                connectTimeout: 60000
+              },
+              listPerPage: 10
+            },
+            factory: {
+              url: 'https://pizza-factory.cs329.click',
+              apiKey: '${FACTORY_API_KEY}'
+            },
+            metrics: {
+              source: 'jwt-pizza-service',
+              url: '${METRICS_URL}',
+              apiKey: '${METRICS_API_KEY}'
+            }
+          };
+          EOF
             
       - name: Validate config
         run: |
