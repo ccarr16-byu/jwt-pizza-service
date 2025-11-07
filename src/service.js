@@ -1,4 +1,5 @@
 const express = require('express');
+const metrics = require('./metrics.js');
 const { authRouter, setAuthUser } = require('./routes/authRouter.js');
 const orderRouter = require('./routes/orderRouter.js');
 const franchiseRouter = require('./routes/franchiseRouter.js');
@@ -8,6 +9,16 @@ const config = require('./config.js');
 
 const app = express();
 app.use(express.json());
+app.use(metrics.requestTracker);
+app.use((req, res, next) => {
+  const startTime = performance.now();
+  res.on('finish', () => {
+    const endTime = performance.now();
+    const latency = endTime - startTime;
+    metrics.logLatency(latency);
+  });
+  next();
+});
 app.use(setAuthUser);
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');

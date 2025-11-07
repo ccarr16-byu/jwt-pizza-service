@@ -1,4 +1,5 @@
 const express = require('express');
+const metrics = require('../metrics.js');
 const jwt = require('jsonwebtoken');
 const config = require('../config.js');
 const { asyncHandler } = require('../endpointHelper.js');
@@ -50,14 +51,17 @@ async function setAuthUser(req, res, next) {
 // Authenticate token
 authRouter.authenticateToken = (req, res, next) => {
   if (!req.user) {
+    metrics.logAuth('failure');
     return res.status(401).send({ message: 'unauthorized' });
   }
+  metrics.logAuth('success');
   next();
 };
 
 // register
 authRouter.post(
   '/',
+  metrics.logUser('login'),
   asyncHandler(async (req, res) => {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -72,6 +76,7 @@ authRouter.post(
 // login
 authRouter.put(
   '/',
+  metrics.logUser('login'),
   asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const user = await DB.getUser(email, password);
@@ -83,6 +88,7 @@ authRouter.put(
 // logout
 authRouter.delete(
   '/',
+  metrics.logUser('logout'),
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     await clearAuth(req);
