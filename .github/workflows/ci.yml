@@ -50,7 +50,11 @@ jobs:
                   apiKey: '${{ secrets.METRICS_API_KEY }}',
                 },
             };" > src/config.js
-
+            
+      - name: Validate config
+        run: |
+          grep -q "${{ secrets.METRICS_URL }}" src/config.js && echo "❌ METRICS_URL secret not injected" && exit 1 || echo "✅ METRICS_URL looks good"
+      
       - name: Tests
         run: npm test
 
