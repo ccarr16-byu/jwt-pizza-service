@@ -214,6 +214,6 @@ function sendMetricsPeriodically(period) {
     }, period);
 }
 
-sendMetricsPeriodically(10000);
+sendMetricsPeriodically(5000);
 
 module.exports = { requestTracker, logUser, logAuth, logLatency, pizzaPurchase };
