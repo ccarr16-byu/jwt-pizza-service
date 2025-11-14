@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(metrics.requestTracker);
 app.use(logger.httpLogger);
-app.use((_req, res, next) => {
+app.use((req, res, next) => {
   const startTime = performance.now();
   res.on('finish', () => {
     const endTime = performance.now();
@@ -37,7 +37,7 @@ apiRouter.use('/user', userRouter);
 apiRouter.use('/order', orderRouter);
 apiRouter.use('/franchise', franchiseRouter);
 
-apiRouter.use('/docs', (_req, res) => {
+apiRouter.use('/docs', (req, res) => {
   res.json({
     version: version.version,
     endpoints: [...authRouter.docs, ...userRouter.docs, ...orderRouter.docs, ...franchiseRouter.docs],
@@ -45,23 +45,24 @@ apiRouter.use('/docs', (_req, res) => {
   });
 });
 
-app.get('/', (_req, res) => {
+app.get('/', (req, res) => {
   res.json({
     message: 'welcome to JWT Pizza',
     version: version.version,
   });
 });
 
-app.use('*', (_req, res) => {
+app.use('*', (req, res) => {
   res.status(404).json({
     message: 'unknown endpoint',
   });
 });
 
 // Default error handler for all exceptions and errors.
-app.use((err, _req, res, _next) => {
+app.use((err, req, res, next) => {
   logger.log(logger.statusToLogLevel(err.statusCode), 'uncaughtError', {res: err.message});
   res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack });
+  next();
 });
 
 module.exports = app;
