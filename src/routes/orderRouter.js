@@ -1,6 +1,7 @@
 const express = require('express');
 const config = require('../config.js');
 const metrics = require('../metrics.js');
+const logger = require('../logger.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
@@ -81,14 +82,16 @@ orderRouter.post(
     const startTime = performance.now();
     const orderReq = req.body;
     const order = await DB.addDinerOrder(req.user, orderReq);
+    const reqBody = JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order });
     const r = await fetch(`${config.factory.url}/api/order`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', authorization: `Bearer ${config.factory.apiKey}` },
-      body: JSON.stringify({ diner: { id: req.user.id, name: req.user.name, email: req.user.email }, order }),
+      body: reqBody,
     });
     const j = await r.json();
     const endTime = performance.now();
     const latency = endTime - startTime;
+    logger.log(logger.statusToLogLevel(r.status), 'factory', {req: reqBody, res: j});
     let price = 0;
     if (r.ok) {
       const items = orderReq.items;
