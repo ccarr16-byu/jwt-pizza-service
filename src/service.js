@@ -60,7 +60,19 @@ app.use('*', (req, res) => {
 
 // Default error handler for all exceptions and errors.
 app.use((err, req, res, next) => {
-  logger.log(logger.statusToLogLevel(err.statusCode), 'uncaughtError', {res: {message: err.message, stack: err.stack}});
+  const logData = {
+      auth: !!req.headers.authorization,
+      path: req.originalUrl,
+      method: req.method,
+      status: err.statusCode || 500,
+      req: JSON.stringify(req.body ?? {}),
+      res: JSON.stringify({
+        message: err.message,
+        stack: err.stack,
+      }),
+    };
+
+  logger.log(logger.statusToLogLevel(logData.status), 'uncaughtError', logData);
   res.status(err.statusCode ?? 500).json({ message: err.message, stack: err.stack });
   next();
 });
