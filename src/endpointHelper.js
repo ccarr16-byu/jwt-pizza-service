@@ -14,9 +14,8 @@ const asyncHandler = (fn) => (req, res, next) => {
       path: req.originalUrl,
       method: req.method,
       status: err.statusCode || 500,
-      error: err.message,
-      stack: err.stack,
       req: JSON.stringify(req.body ?? {}),
+      res: JSON.stringify(err),
     };
 
     const level = logger.statusToLogLevel(logData.status);
