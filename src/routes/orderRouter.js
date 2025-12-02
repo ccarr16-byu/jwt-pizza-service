@@ -111,6 +111,15 @@ orderRouter.post(
     const j = await r.json();
     const endTime = performance.now();
     const latency = endTime - startTime;
+
+    const logData = {
+      auth: !!req.headers.authorization,
+      path: req.originalUrl,
+      method: req.method,
+      status: res.statusCode,
+      req: JSON.stringify(req.body),
+    };
+
     let price = 0;
     if (r.ok) {
       const items = orderReq.items;
@@ -119,20 +128,14 @@ orderRouter.post(
         price += items[i].price;
       }
       metrics.pizzaPurchase('success', latency, price, order_size);
+      logData.res = JSON.stringify({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
       res.send({ order, followLinkToEndChaos: j.reportUrl, jwt: j.jwt });
     } else {
       metrics.pizzaPurchase('failure', latency, price, 0);
+      logData.res = JSON.stringify({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
       res.status(500).send({ message: 'Failed to fulfill order at factory', followLinkToEndChaos: j.reportUrl });
     }
-
-    const logData = {
-      auth: !!req.headers.authorization,
-      path: req.originalUrl,
-      method: req.method,
-      status: res.statusCode,
-      req: JSON.stringify(req.body),
-      res: JSON.stringify(res),
-    };   
+      
     const level = logger.statusToLogLevel(logData.status);
     logger.log(level, 'factory', logData);
   })
