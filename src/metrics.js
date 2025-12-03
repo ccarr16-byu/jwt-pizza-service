@@ -169,11 +169,12 @@ function getUserMetrics() {
 
 function pizzaPurchase(status, latency, price, order_size) {
     if (status !== 'success') {
-        failedPizzas++;
+        failedPizzas+= order_size;
+    } else {
+        pizzasSold += order_size;
     }
     pizzaLatency += latency;
     revenue += price;
-    pizzasSold += order_size;
 }
 
 function getLatencyMetrics() {
